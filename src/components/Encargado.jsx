@@ -11,8 +11,14 @@ function Encargado({ user }) {
 		const getItems = async () => {
 			const colRef = collection(db, "users");
 			const result = await getDocs(query(colRef));
-			setArticulos(getArrayFromCollection(result));
+			const textoABuscar = document.getElementById("inputBuscador").value;
+		if (textoABuscar === "") {
+			setArticulos("")
 			return getArrayFromCollection(result);
+		} else {
+			setArticulos(getArrayFromCollection(result));
+			return getArrayFromCollection(result);				
+		}
 		};
 		const getArrayFromCollection = (collection) => {
 			return collection.docs.map((doc) => {
@@ -27,9 +33,9 @@ function Encargado({ user }) {
 					window.confirm("No puedes retirar una cantidad mayor que el Stock");
 					document.getElementById("RE" + id).value = "";
 				} else {
-					stock = stock - cantRetirar;
+					stock = Math.floor(stock) - Math.floor(cantRetirar);
 					const fecha = new Date(Date.now()).toLocaleString();
-					const autor = user.email;
+					const autor = user.campos[1];
 					const accion = "Retiro";
 					await updateDoc(doc(db, "users", id), {
 						stock,
@@ -58,6 +64,7 @@ function Encargado({ user }) {
 						<div className="container-fluid">
 							<form className="d-flex">
 								<input
+									id="inputBuscador"
 									className="form-control me-2"
 									type="search"
 									placeholder="Buscar artículos..."

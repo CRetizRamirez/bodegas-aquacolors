@@ -1,25 +1,17 @@
-import Registro from "./Registro";
 import Nav from "./Nav";
-import IngresarArticulo from "./IngresarArticulo";
 import React, { useState } from "react";
 import { db } from "../firebase/credenciales";
-import {
-	collection,
-	getDocs,
-	query,
-	doc,
-	deleteDoc,
-	updateDoc,
-} from "firebase/firestore";
+import { collection, getDocs, query, doc, updateDoc } from "firebase/firestore";
+import IngresarArticulo from "./IngresarArticulo";
 
-function Gerente({ user }) {
+function SubGerente({ user }) {
 	const [busqueda, setBusqueda] = useState("");
 	const [articulos, setArticulos] = useState("");
-
-	const getItems = async () => {
-		const colRef = collection(db, "users");
-		const result = await getDocs(query(colRef));
-		const textoABuscar = document.getElementById("inputBuscador").value;
+	if (user) {
+		const getItems = async () => {
+			const colRef = collection(db, "users");
+			const result = await getDocs(query(colRef));
+			const textoABuscar = document.getElementById("inputBuscador").value;
 		if (textoABuscar === "") {
 			setArticulos("")
 			return getArrayFromCollection(result);
@@ -27,45 +19,18 @@ function Gerente({ user }) {
 			setArticulos(getArrayFromCollection(result));
 			return getArrayFromCollection(result);				
 		}
-	};
-	const getArrayFromCollection = (collection) => {
-		//setArticulos('')
-		return collection.docs.map((doc) => {
-			return { ...doc.data(), id: doc.id };
-		});
-	};
-	
-	const deleteItem = async (id, art) => {
-		if (
-			window.confirm(
-				"CUIDADO ...!!!  Estas a punto de eliminar  *** " +
-					art +
-					" ***  esta acción no se puede  revertir"
-			)
-		) {
-			await deleteDoc(doc(db, "users", id));
-			getItems();
-		}
-	};
-	if (user) {
-
-		async function agregar(id, art, stock, cantAgregar) {
-			if (cantAgregar) {
-				stock = Math.floor(stock) + Math.floor(cantAgregar);
-				const fecha = new Date(Date.now()).toLocaleString();
-				const autor = user.campos[1];
-				const accion = "Agregado";
-				await updateDoc(doc(db, "users", id), { stock, fecha, autor, accion });
-				document.getElementById("AG" + id).value = "";
-				getItems();
-			}
-		}
+		};
+		const getArrayFromCollection = (collection) => {
+			return collection.docs.map((doc) => {
+				return { ...doc.data(), id: doc.id };
+			});
+		};
 
 		async function retirar(id, art, stock, cantRetirar) {
 			if (cantRetirar) {
 				if (Math.floor(cantRetirar) > stock) {
 					window.confirm("No puedes retirar una cantidad mayor que el Stock");
-					document.getElementById("RG" + id).value = "";
+					document.getElementById("RS" + id).value = "";
 				} else {
 					stock = Math.floor(stock) - Math.floor(cantRetirar);
 					const fecha = new Date(Date.now()).toLocaleString();
@@ -77,9 +42,21 @@ function Gerente({ user }) {
 						autor,
 						accion,
 					});
-					document.getElementById("RG" + id).value = "";
+					document.getElementById("RS" + id).value = "";
 					getItems();
 				}
+			}
+		}
+
+		async function agregar(id, art, stock, cantAgregar) {
+			if (cantAgregar) {
+				stock = Math.floor(stock) + Math.floor(cantAgregar);
+				const fecha = new Date(Date.now()).toLocaleString();
+				const autor = user.campos[1];
+				const accion = "Agregado";
+				await updateDoc(doc(db, "users", id), { stock, fecha, autor, accion });
+				document.getElementById("AS" + id).value = ""; // Para limpiar el input
+				getItems();
 			}
 		}
 
@@ -92,46 +69,8 @@ function Gerente({ user }) {
 		return (
 			<div className="container mt-4">
 				<Nav />
-				<h2>
-					Bienvenid@ : {user.campos[1]} {}
-				</h2>
+				<h2>Bienvenid@ : {user.campos[1]} </h2>
 				<div id="grupoDeBotones" className="my-3">
-					<button
-						type="button"
-						className="btn btn-outline-primary"
-						data-bs-toggle="modal"
-						data-bs-target="#modalRegistro">
-						Registrar Usuarios
-					</button>
-					<div
-						className="modal fade"
-						id="modalRegistro"
-						data-bs-backdrop="static"
-						data-bs-keyboard="false"
-						tabIndex="-1"
-						aria-labelledby="modalRegistroLabel"
-						aria-hidden="true">
-						<div className="modal-dialog">
-							<div className="modal-content">
-								<div className="modal-header">
-									<h3 className="modal-title" id="modalRegistroLabel">
-										Registro de Usuarios
-									</h3>
-								</div>
-								<div className="modal-body">
-									<Registro />
-								</div>
-								<div className="modal-footer ">
-									<button
-										type="button"
-										className="btn btn-primary"
-										data-bs-dismiss="modal">
-										Cerrar
-									</button>
-								</div>
-							</div>
-						</div>
-					</div>
 					<button
 						className="btn btn-outline-secondary"
 						type="button"
@@ -193,17 +132,11 @@ function Gerente({ user }) {
 									<th scope="col">Stock</th>
 									<th scope="col">Bodega</th>
 									<th scope="col">Ubicacion</th>
-									<th scope="col">Accion</th>
-									<th scope="col">Autor</th>
-									<th scope="col">Fecha</th>
 									<th scope="col" className="text-primary">
 										Retirar
 									</th>
 									<th scope="col" className="text-success">
 										Agregar
-									</th>
-									<th scope="col" className="text-danger">
-										Eliminar
 									</th>
 								</tr>
 							</thead>
@@ -220,16 +153,13 @@ function Gerente({ user }) {
 												<td>{doc.stock}</td>
 												<td>{doc.bodega}</td>
 												<td>{doc.ubicacion}</td>
-												<td>{doc.accion}</td>
-												<td>{doc.autor}</td>
-												<td>{doc.fecha}</td>
 												<td>
 													<div className="input-group mb-3">
 														<input
 															minLength="4"
 															maxLength="8"
 															size="4"
-															id={"RG" + doc.id}
+															id={"RS" + doc.id}
 															type="number"
 															min="0"
 															placeholder={doc.articulo}
@@ -243,7 +173,7 @@ function Gerente({ user }) {
 																		doc.id,
 																		doc.articulo,
 																		doc.stock,
-																		document.getElementById("RG" + doc.id).value
+																		document.getElementById("RS" + doc.id).value
 																	)
 																}>
 																Retirar
@@ -257,7 +187,7 @@ function Gerente({ user }) {
 															minLength="4"
 															maxLength="8"
 															size="4"
-															id={"AG" + doc.id}
+															id={"AS" + doc.id}
 															type="number"
 															min="0"
 															placeholder={doc.articulo}
@@ -271,21 +201,13 @@ function Gerente({ user }) {
 																		doc.id,
 																		doc.articulo,
 																		doc.stock,
-																		document.getElementById("AG" + doc.id).value
+																		document.getElementById("AS" + doc.id).value
 																	)
 																}>
 																Agregar
 															</button>
 														</div>
 													</div>
-												</td>
-												<td>
-													<button
-														type="button"
-														className="btn btn-danger"
-														onClick={() => deleteItem(doc.id, doc.articulo)}>
-														Eliminar
-													</button>
 												</td>
 											</tr>
 										</tbody>
@@ -301,4 +223,4 @@ function Gerente({ user }) {
 	}
 }
 
-export default Gerente;
+export default SubGerente;

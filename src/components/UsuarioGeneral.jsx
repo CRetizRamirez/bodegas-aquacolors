@@ -12,8 +12,14 @@ function UsuarioGeneral({ user }) {
 		const getItems = async () => {
 			const colRef = collection(db, "users");
 			const result = await getDocs(query(colRef));
-			setArticulos(getArrayFromCollection(result));
+			const textoABuscar = document.getElementById("inputBuscador").value;
+		if (textoABuscar === "") {
+			setArticulos("")
 			return getArrayFromCollection(result);
+		} else {
+			setArticulos(getArrayFromCollection(result));
+			return getArrayFromCollection(result);				
+		}
 		};
 		const getArrayFromCollection = (collection) => {
 			return collection.docs.map((doc) => {
@@ -36,6 +42,7 @@ function UsuarioGeneral({ user }) {
 						<div className="container-fluid">
 							<form className="d-flex">
 								<input
+									id="inputBuscador"
 									className="form-control me-2"
 									type="search"
 									placeholder="Buscar artículos..."

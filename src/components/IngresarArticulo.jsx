@@ -2,9 +2,9 @@ import React from "react";
 import { db } from "../firebase/credenciales";
 import { collection, addDoc } from "firebase/firestore";
 
-function IngresarArticulo() {
+function IngresarArticulo({user}) {
 	// Para ingresar articulos a db
-	async function ingresarArt(clave, articulo, stock, bodega, ubicacion, fechaActual) {
+	async function ingresarArt(clave, articulo, stock, bodega, ubicacion, fechaActual, autor) {
 		try {
 			const docRef = await addDoc(collection(db, "users"), {
 				clave: clave,
@@ -13,6 +13,7 @@ function IngresarArticulo() {
 				bodega: bodega,
 				ubicacion: ubicacion,
 				fecha: fechaActual,
+				autor: autor,
 			});
 		} catch (e) {
 			console.error("Error al ingresar el artículo: ", e);
@@ -27,7 +28,8 @@ function IngresarArticulo() {
 		const bodega = e.target.elements.bodega.value.toString().toLowerCase();
 		const ubicacion = e.target.elements.ubicacion.value.toString().toLowerCase();
 		const fechaActual = (new Date(Date.now())).toLocaleString();
-		ingresarArt(clave, articulo, stock, bodega, ubicacion, fechaActual);
+		const autor = user.campos[1];
+		ingresarArt(clave, articulo, stock, bodega, ubicacion, fechaActual, autor);
 		e.target.reset();
 	}
 
@@ -64,21 +66,24 @@ function IngresarArticulo() {
 				</div>
 				<div className="mb-3">
 					<input
-						id="bodega"
-						type="text"
-						className="form-control"
-						placeholder="Bodega"
-						required
-					/>
-				</div>
-				<div className="mb-3">
-					<input
 						id="ubicacion"
 						type="text"
 						className="form-control"
 						placeholder="Ubicacion"
 						required
 					/>
+				</div>
+				<div className="mb-4">
+					<label>Bodega:
+						<div className="dropdown">
+							<select id="bodega">
+								<option value="candy">Candy</option>
+								<option value="cristal">Cristal</option>
+								<option value="oficina">Oficina</option>
+								<option value="perla">Perla</option>
+							</select>
+						</div>
+					</label>
 				</div>
 				<div className="d-grid gap-2">
 					<button type="submit" className="btn btn-secondary">

@@ -81,6 +81,7 @@ function Registro() {
 								<option value="gerente">Gerente</option>
 								<option value="encargado">Encargado</option>
 								<option value="usuariogeneral">Usuario General</option>
+								<option value="subgerente">Sub-gerente</option>
 							</select>
 						</div>
 					</label>

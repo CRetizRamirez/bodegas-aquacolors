@@ -2,11 +2,12 @@ import { Routes, Route } from "react-router-dom";
 import Login from "./components/Login";
 import Gerente from "./components/Gerente";
 import Encargado from "./components/Encargado";
+import SubGerente from "./components/SubGerente";
 import UsuarioGeneral from "./components/UsuarioGeneral";
 import ProtectedRoute from "./components/ProtectedRoute";
+import firebaseApp from "./firebase/credenciales";
 import { useState } from "react";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
-import firebaseApp from "./firebase/credenciales";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 const auth = getAuth(firebaseApp);
@@ -54,7 +55,7 @@ function App() {
 				<Route
 					path="/gerente"
 					element={
-						<ProtectedRoute user={user} >
+						<ProtectedRoute user={user}>
 							<Gerente user={user} />
 						</ProtectedRoute>
 					}
@@ -62,7 +63,7 @@ function App() {
 				<Route
 					path="/encargado"
 					element={
-						<ProtectedRoute user={user} >
+						<ProtectedRoute user={user}>
 							<Encargado user={user} />
 						</ProtectedRoute>
 					}
@@ -70,8 +71,16 @@ function App() {
 				<Route
 					path="/usuariogeneral"
 					element={
-						<ProtectedRoute user={user} >
+						<ProtectedRoute user={user}>
 							<UsuarioGeneral user={user} />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/subgerente"
+					element={
+						<ProtectedRoute user={user}>
+							<SubGerente user={user} />
 						</ProtectedRoute>
 					}
 				/>

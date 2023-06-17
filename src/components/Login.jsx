@@ -23,6 +23,7 @@ function Login() {
 				if (rol === "gerente") navigate("/gerente");
 				if (rol === "encargado") navigate("/encargado");
 				if (rol === "usuariogeneral") navigate("/usuariogeneral");
+				if (rol === "subgerente") navigate("/subgerente");
 			})
 			.catch((error) => {
 				const errorCode = error.code;
